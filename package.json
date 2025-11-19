@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,15 +15,17 @@
   "license": "ISC",
   "description": "Backend API for WyWallet mobile app",
   "dependencies": {
-    "express": "^4.18.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "drizzle-kit": "^0.21.0",
+    "drizzle-orm": "^0.29.0",
+    "express": "^4.18.2",
     "express-jwt": "^8.4.1",
     "jwks-rsa": "^3.0.1",
+    "playwright": "^1.56.1",
     "postgres": "^3.4.3",
-    "dotenv": "^16.3.1",
-    "uuid": "^9.0.1",
-    "drizzle-orm": "^0.29.0",
-    "drizzle-kit": "^0.21.0"
+    "puppeteer": "^24.30.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.0"

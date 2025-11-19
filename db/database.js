@@ -1,6 +1,5 @@
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
-import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -20,7 +19,7 @@ export const initializeDatabase = async () => {
     // Validate required environment variables
     const requiredEnvVars = ['POSTGRES_HOST', 'POSTGRES_DB', 'POSTGRES_USER', 'POSTGRES_PASSWORD'];
     const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-    
+
     if (missingVars.length > 0) {
       throw new Error(
         `Missing required PostgreSQL environment variables: ${missingVars.join(', ')}\n` +
@@ -28,12 +27,10 @@ export const initializeDatabase = async () => {
       );
     }
 
-    // Log database connection info (without password)
     console.log(`Connecting to PostgreSQL database: ${process.env.POSTGRES_DB}@${process.env.POSTGRES_HOST}`);
     console.log(`User: ${process.env.POSTGRES_USER}`);
     console.log(`SSL: ${process.env.POSTGRES_SSL === 'true' ? 'enabled' : 'disabled'}`);
 
-    // Create PostgreSQL connection
     connection = postgres({
       host: process.env.POSTGRES_HOST,
       port: parseInt(process.env.POSTGRES_PORT || '5432'),
@@ -46,28 +43,28 @@ export const initializeDatabase = async () => {
     // Initialize Drizzle
     db = drizzle(connection, { schema });
 
-    // Run migrations
-    const migrationsPath = path.join(__dirname, 'migrations');
-    try {
-      await migrate(db, { migrationsFolder: migrationsPath });
-      console.log('Migrations applied successfully');
-    } catch (migrateError) {
-      // Check if it's because migrations folder doesn't exist or is empty
-      const fs = await import('fs');
-      if (!fs.existsSync(migrationsPath)) {
-        console.warn('Migrations folder does not exist. Run `npm run db:generate` to create migrations.');
-      } else {
-        const migrationFiles = fs.readdirSync(migrationsPath).filter(file => 
-          file.endsWith('.sql') || fs.statSync(path.join(migrationsPath, file)).isDirectory()
-        );
-        if (migrationFiles.length === 0) {
-          console.warn('Migrations folder exists but is empty. Run `npm run db:generate` to create migrations.');
-        } else {
-          console.error('Migration error:', migrateError);
-          throw migrateError;
-        }
-      }
-    }
+    // // Run migrations
+    // const migrationsPath = path.join(__dirname, 'migrations');
+    // try {
+    //   await migrate(db, { migrationsFolder: migrationsPath });
+    //   console.log('Migrations applied successfully');
+    // } catch (migrateError) {
+    //   // Check if it's because migrations folder doesn't exist or is empty
+    //   const fs = await import('fs');
+    //   if (!fs.existsSync(migrationsPath)) {
+    //     console.warn('Migrations folder does not exist. Run `npm run db:generate` to create migrations.');
+    //   } else {
+    //     const migrationFiles = fs.readdirSync(migrationsPath).filter(file =>
+    //       file.endsWith('.sql') || fs.statSync(path.join(migrationsPath, file)).isDirectory()
+    //     );
+    //     if (migrationFiles.length === 0) {
+    //       console.warn('Migrations folder exists but is empty. Run `npm run db:generate` to create migrations.');
+    //     } else {
+    //       console.error('Migration error:', migrateError);
+    //       throw migrateError;
+    //     }
+    //   }
+    // }
 
     console.log('Database initialized successfully');
   } catch (error) {

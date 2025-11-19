@@ -5,7 +5,8 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || 'dev-ijjyierp1cvlyen2.us.auth0.com';
-const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'https://api.wywallet.com';
+const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'https://dev-ijjyierp1cvlyen2.us.auth0.com/api/v2/';
+// const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE || 'wynwallet-api';
 
 export const authMiddleware = expressjwt({
   secret: jwksRsa.expressJwtSecret({

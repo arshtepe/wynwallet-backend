@@ -78,10 +78,10 @@ router.post('/personal-info', async (req, res) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    const { fullName, dateOfBirth, email, phone } = req.body;
+    const { fullName, dateOfBirth, email, phone, iban } = req.body;
 
     // Validation
-    if (!fullName || !dateOfBirth || !email || !phone) {
+    if (!fullName || !dateOfBirth || !email || !phone || !iban) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -103,6 +103,7 @@ router.post('/personal-info', async (req, res) => {
           dateOfBirth,
           email,
           phone,
+          iban,
           updatedAt: sql`NOW()`,
         })
         .where(eq(schema.personalInfo.userId, user.id));
@@ -114,6 +115,7 @@ router.post('/personal-info', async (req, res) => {
         dateOfBirth,
         email,
         phone,
+        iban,
       });
     }
 
@@ -181,6 +183,41 @@ router.post('/address', async (req, res) => {
   } catch (error) {
     console.error('Error submitting address:', error);
     res.status(500).json({ error: 'Failed to submit address' });
+  }
+});
+
+// POST /user/notification-token
+router.post('/notification-token', async (req, res) => {
+  try {
+    const db = getDatabase();
+    const auth0Id = getUserId(req);
+    
+    if (!auth0Id) {
+      return res.status(401).json({ error: 'User not authenticated' });
+    }
+
+    const { token } = req.body;
+
+    // Validation
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ error: 'Missing or invalid notification token' });
+    }
+
+    const user = await getOrCreateUser(db, auth0Id);
+
+    // Update user's notification token
+    await db
+      .update(schema.users)
+      .set({
+        notificationToken: token,
+        updatedAt: sql`NOW()`,
+      })
+      .where(eq(schema.users.id, user.id));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving notification token:', error);
+    res.status(500).json({ error: 'Failed to save notification token' });
   }
 });
 
