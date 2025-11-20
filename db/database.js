@@ -1,5 +1,6 @@
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,28 +44,29 @@ export const initializeDatabase = async () => {
     // Initialize Drizzle
     db = drizzle(connection, { schema });
 
-    // // Run migrations
-    // const migrationsPath = path.join(__dirname, 'migrations');
-    // try {
-    //   await migrate(db, { migrationsFolder: migrationsPath });
-    //   console.log('Migrations applied successfully');
-    // } catch (migrateError) {
-    //   // Check if it's because migrations folder doesn't exist or is empty
-    //   const fs = await import('fs');
-    //   if (!fs.existsSync(migrationsPath)) {
-    //     console.warn('Migrations folder does not exist. Run `npm run db:generate` to create migrations.');
-    //   } else {
-    //     const migrationFiles = fs.readdirSync(migrationsPath).filter(file =>
-    //       file.endsWith('.sql') || fs.statSync(path.join(migrationsPath, file)).isDirectory()
-    //     );
-    //     if (migrationFiles.length === 0) {
-    //       console.warn('Migrations folder exists but is empty. Run `npm run db:generate` to create migrations.');
-    //     } else {
-    //       console.error('Migration error:', migrateError);
-    //       throw migrateError;
-    //     }
-    //   }
-    // }
+    // Run migrations
+    const migrationsPath = path.join(__dirname, 'migrations');
+    try {
+      console.log('Running database migrations...');
+      await migrate(db, { migrationsFolder: migrationsPath });
+      console.log('Migrations applied successfully');
+    } catch (migrateError) {
+      // Check if it's because migrations folder doesn't exist or is empty
+      const fs = await import('fs');
+      if (!fs.existsSync(migrationsPath)) {
+        console.warn('Migrations folder does not exist. Run `npm run db:generate` to create migrations.');
+      } else {
+        const migrationFiles = fs.readdirSync(migrationsPath).filter(file =>
+          file.endsWith('.sql') || fs.statSync(path.join(migrationsPath, file)).isDirectory()
+        );
+        if (migrationFiles.length === 0) {
+          console.warn('Migrations folder exists but is empty. Run `npm run db:generate` to create migrations.');
+        } else {
+          console.error('Migration error:', migrateError);
+          throw migrateError;
+        }
+      }
+    }
 
     console.log('Database initialized successfully');
   } catch (error) {
